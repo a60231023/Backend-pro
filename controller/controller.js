@@ -1,6 +1,7 @@
 const User = require("../model/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
 
 const test = (req, res) => {
   res.send("<h1>Hello from auth system</h1>");
@@ -9,7 +10,6 @@ const test = (req, res) => {
 const register = async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body;
-
     if (!(firstname && lastname && email && password)) {
       res.status(401).json({
         message: "All fields are required",
@@ -88,9 +88,18 @@ const login = async (req, res) => {
           expiresIn: "2h",
         }
       );
+      //using cookie
+      //date = 3 days = 3 * 24 hours * 60 mins * 60 sec * 1000 = milisecond value of 3 days
+      const options = {
+        expires: new Date(Date.now() + 2*60*60*1000),
+        httpOnly: true
+      };
       user.token = token;
       user.password = undefined;
-      return res.status(200).json(user);
+      return res.status(200).cookie('token', token, options).json({
+        success: true,
+        user
+      })
     }
     res.status(400).json({
       message: "Password is incorrect",
@@ -100,8 +109,15 @@ const login = async (req, res) => {
   }
 };
 
+const dashboard = async (req, res) => {
+    res.status(200).json({
+        message:"Welcome to the Dashboard"
+    });
+}
+
 module.exports = {
   test,
   register,
   login,
+  dashboard,
 };
