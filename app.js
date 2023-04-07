@@ -30,21 +30,34 @@ app.post("/register", async (req, res) => {
     }
     const encryptPass = await bcrypt.hash(password, 10);
 
-    //here we have just created the user schema with value, we have not saved in the database
-    const user = await User.create({
+    let user = await User.create({
       firstname,
       lastname,
       email: email.toLowerCase(),
       password: encryptPass,
+      token: undefined,
     });
 
     //token creation - simple function jwt.sign which take in the payload i.e any unqiue value up to you- as an object, then the next thing will be secret key . now the unique thing will be the id which mongodb will give us when we have created the user.the last argument is the algorith and the expire. you need you mention the algorith only if you wnat to change it. default is sha256
 
-    const token = jwt.sign({ user_id: user._id }, process.env.SECRET_KEY, {
+    const jwttoken = jwt.sign({ user_id: user._id }, process.env.SECRET_KEY, {
       expiresIn: "2h",
     });
-    user.token = token;
 
+    User.findByIdAndUpdate(user._id, { token: jwttoken }, { new: true })
+      .then((updatedUser) => {
+        user = updatedUser;
+        console.log("User updated:", updatedUser);
+      })
+      .catch((error) => {
+        console.log("Error updating user:", error);
+        res.status(500).json({
+          message: "server error while updating the token",
+          error
+        })
+      });
+
+    user.password = undefined;
     res.status(201).json({
       user,
     });
