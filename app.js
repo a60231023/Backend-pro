@@ -53,13 +53,54 @@ app.post("/register", async (req, res) => {
         console.log("Error updating user:", error);
         res.status(500).json({
           message: "server error while updating the token",
-          error
-        })
+          error,
+        });
       });
 
     user.password = undefined;
     res.status(201).json({
       user,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!(email && password)) {
+      res.status(400).json({
+        message: "field is missing",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(400).json({
+        message: "You are not registered",
+      });
+    }
+    //compare the pasword
+
+    const correctPass = await bcrypt.compare(password, user.password);
+    if (correctPass) {
+      const token = jwt.sign(
+        {
+          user_id: user._id,
+        },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "2h",
+        }
+      );
+      user.token = token;
+      user.password = undefined;
+      return res.status(200).json(user);
+    }
+    res.status(400).json({
+      message: "Password is incorrect",
     });
   } catch (error) {
     console.log(error);
