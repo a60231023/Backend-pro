@@ -58,18 +58,36 @@ app.post("/mypost", async (req, res) => {
   console.log(req.body);
   console.log(req.files);
 
-  let file = req.files.samplefile; // samplefile is the name of the file in the frontend by whcih it comes
+  let imageArray = [];
+  let file = req.files.samplefile; // samplefile is the name of the file in the frontend by whcih it comes -- for multiple files samplefile becomes an array
 
-  // first argument is the file(path of the file), next is the option which can be folder name where you want to upload in the clodinary folder
-  result = await cloudinary.uploader.upload(file.tempFilePath, {
+  if (req.files) {
+    for (let index = 0; index < req.files.samplefile.length; index++) {
+      let result = await cloudinary.uploader.upload(
+        req.files.samplefile[index].tempFilePath,
+        {
+          folder: "users",
+        }
+      );
+      imageArray.push(result);
+    }
+  }
+
+  /**
+   * single file
+   * first argument is the file(path of the file), next is the option which can be folder name where you want to upload in the clodinary folder
+
+   * result = await cloudinary.uploader.upload(file.tempFilePath, {
     folder: "users",
   });
   console.log(result);
 
+*/
+
   const details = {
     firstname: req.body.firstname,
     lastname: req.body.lastname,
-    result,
+    imageArray,
   };
   res.send(details);
 });
