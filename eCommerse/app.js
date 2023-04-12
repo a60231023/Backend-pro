@@ -5,6 +5,10 @@ const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const app = express();
 
+
+app.set("view engine", "ejs");
+
+
 //for swagger documentation
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
@@ -17,7 +21,18 @@ app.use(express.urlencoded({ extended: true }));
 
 //cookie and file middleware
 app.use(cookieParser());
-app.use(fileUpload());
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
+
+
+app.get("/postform", (req, res) => {
+  // it(express) will automatically look in the views folder
+  res.render("postForm");
+});
 
 //morgan middleware
 app.use(morgan("tiny"));
@@ -29,6 +44,5 @@ const user = require("./routes/userRoute");
 //router middleware
 app.use("/api/v1", home);
 app.use("/api/v1", user);
-
 
 module.exports = app;
