@@ -198,7 +198,10 @@ exports.changePassword = BigPromise(async (req, res, next) => {
 
 exports.updateUserDetails = BigPromise(async (req, res, next) => {
   // add a check for email and name in body
-
+  const {name, email} = req.body;
+  if(!name || !email){
+    return next(new CustomError("Please provide name and email", 400));
+  }
   // collect data from body
   const newData = {
     name: req.body.name,
