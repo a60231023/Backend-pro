@@ -34,9 +34,9 @@ const productSchema = new mongoose.Schema({
         required: [true, 'Please select catregory from - short-sleeves, long-sleeves, sweat-shirts, hoodies'],// if somebody doesn't sends the category then this error message
         enum: {
             values: [
-                'short-sleeves',
-                'long-sleeves',
-                'sweat-shirts',
+                'shortsleeves',
+                'longsleeves',
+                'sweatshirts',
                 'hoodies'
             ],
             // if somebody sends the category other than the values then this message
